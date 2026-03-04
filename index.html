@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<h1>ETF Transparency</h1>
+
+<div>BTC reserves: <span id="btc"></span></div>
+<div>SOL reserves: <span id="sol"></span></div>
+<div>Total AUM: <span id="aum"></span></div>
+<div>NAV: <span id="nav"></span></div>
+
+<script>
+
+async function load(){
+
+const res = await fetch("/api/dashboard")
+const data = await res.json()
+
+document.getElementById("btc").innerText=data.btc
+document.getElementById("sol").innerText=data.sol
+document.getElementById("aum").innerText=data.totalValue
+document.getElementById("nav").innerText=data.nav
+
+}
+
+load()
+
+</script>
+
+</body>
+
+</html>

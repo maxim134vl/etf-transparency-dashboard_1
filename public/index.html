@@ -16,7 +16,7 @@
 
 async function load(){
 
-const res = await fetch("/api/reserves")
+const res = await fetch("/api/dashboard")
 const data = await res.json()
 
 document.getElementById("btc").innerText = data.btc

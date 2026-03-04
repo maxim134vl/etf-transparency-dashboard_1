@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>ETF Transparency</title>
+</head>
+
+<body>
+
+<h1>Crypto ETF Reserves</h1>
+
+<div>BTC: <span id="btc"></span></div>
+<div>SOL: <span id="sol"></span></div>
+
+<script>
+
+async function load(){
+
+const res = await fetch("/api/reserves")
+const data = await res.json()
+
+document.getElementById("btc").innerText = data.btc
+document.getElementById("sol").innerText = data.sol
+
+}
+
+load()
+
+</script>
+
+</body>
+
+</html>

@@ -2,32 +2,219 @@
 <html>
 
 <head>
-<title>ETF Transparency</title>
+
+<title>Crypto ETF Transparency Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b1220;
+color:white;
+padding:40px;
+}
+
+h1{
+font-size:36px;
+margin-bottom:30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+.card{
+background:#162038;
+padding:25px;
+border-radius:12px;
+}
+
+.label{
+font-size:14px;
+opacity:0.6;
+}
+
+.value{
+font-size:26px;
+margin-top:10px;
+font-weight:bold;
+}
+
+.address{
+font-size:12px;
+opacity:0.7;
+word-break:break-all;
+}
+
+canvas{
+margin-top:40px;
+background:#162038;
+padding:20px;
+border-radius:12px;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h1>Crypto ETF Reserves</h1>
+<h1>Crypto ETF Transparency Portal</h1>
 
-<div>BTC: <span id="btc"></span></div>
-<div>SOL: <span id="sol"></span></div>
+<div class="grid">
+
+<div class="card">
+<div class="label">BTC Reserves</div>
+<div id="btc" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">SOL Reserves</div>
+<div id="sol" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">BTC Price</div>
+<div id="btcprice" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">SOL Price</div>
+<div id="solprice" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">Total AUM</div>
+<div id="aum" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">NAV per share</div>
+<div id="nav" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">Coverage Ratio</div>
+<div id="coverage" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">Staked SOL</div>
+<div id="staked" class="value"></div>
+</div>
+
+<div class="card">
+<div class="label">Staking Yield</div>
+<div id="yield" class="value"></div>
+</div>
+
+</div>
+
+<h2 style="margin-top:40px">Proof of Custody</h2>
+
+<div class="card">
+
+<div>BTC Wallet</div>
+<div id="btcaddr" class="address"></div>
+
+<div style="margin-top:10px">SOL Wallet</div>
+<div id="soladdr" class="address"></div>
+
+</div>
+
+<canvas id="aumChart"></canvas>
 
 <script>
 
+let chart;
+
 async function load(){
 
-const res = await fetch("/api/dashboard")
-const data = await res.json()
+ const res =
+ await fetch("/api/dashboard");
 
-document.getElementById("btc").innerText = data.btc
-document.getElementById("sol").innerText = data.sol
+ const data =
+ await res.json();
+
+ document.getElementById("btc").innerText =
+ data.reserves.btc.toFixed(4)+" BTC";
+
+ document.getElementById("sol").innerText =
+ data.reserves.sol.toFixed(2)+" SOL";
+
+ document.getElementById("btcprice").innerText =
+ "$"+data.prices.btc.toLocaleString();
+
+ document.getElementById("solprice").innerText =
+ "$"+data.prices.sol.toLocaleString();
+
+ document.getElementById("aum").innerText =
+ "$"+Math.round(
+  data.valuation.totalValue
+ ).toLocaleString();
+
+ document.getElementById("nav").innerText =
+ "$"+data.fund.nav.toFixed(2);
+
+ document.getElementById("coverage").innerText =
+ data.fund.coverage.toFixed(2);
+
+ document.getElementById("staked").innerText =
+ data.staking.stakedSOL.toFixed(2)+" SOL";
+
+ document.getElementById("yield").innerText =
+ (data.staking.yield*100).toFixed(2)+"%";
+
+ document.getElementById("btcaddr").innerText =
+ data.custody.btcAddress;
+
+ document.getElementById("soladdr").innerText =
+ data.custody.solAddress;
+
+ const labels =
+ data.history.map(h =>
+ new Date(h.time).toLocaleTimeString()
+ );
+
+ const values =
+ data.history.map(h => h.aum);
+
+ if(!chart){
+
+  const ctx =
+  document.getElementById("aumChart");
+
+  chart =
+  new Chart(ctx,{
+   type:"line",
+   data:{
+    labels,
+    datasets:[{
+     label:"AUM",
+     data:values
+    }]
+   }
+  });
+
+ }else{
+
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = values;
+  chart.update();
+
+ }
 
 }
 
-load()
+load();
+
+setInterval(load,20000);
 
 </script>
 
 </body>
-
 </html>
